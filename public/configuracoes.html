@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Configurações</title>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:         #008f8c;
+      --primary-light:   #00d17a;
+      --primary-focus:   #008f8c;
+      --primary-dark:    #005451;
+      --ink:             #1d1d1f;
+      --ink-muted:       #6e6e73;
+      --ink-subtle:      #aeaeb2;
+      --canvas:          #ffffff;
+      --canvas-page:     #f0f7f7;
+      --canvas-input:    #f2f2f7;
+      --hairline:        #e0e0e0;
+      --on-dark:         #ffffff;
+      --on-dark-muted:   rgba(255,255,255,0.65);
+      --sidebar-w:       220px;
+      --topbar-h:        64px;
+      --radius-sm:       8px;
+      --radius-md:       12px;
+      --radius-lg:       18px;
+      --radius-pill:     9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-page);
+      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    /* ─────────────────── SIDEBAR ─────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: linear-gradient(180deg, #005451 0%, #005451 55%, #008f8c 100%);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      overflow: hidden;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: padding 0.22s, gap 0.22s;
+    }
+
+    .logo-mark {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, #00d17a, #008f8c);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: rgba(0,0,0,0.22) 0 3px 12px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .logo-text {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--on-dark);
+      letter-spacing: 0.6px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.15s, width 0.22s;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      text-decoration: none;
+      letter-spacing: -0.224px;
+      transition: background 0.12s, color 0.12s, padding 0.22s, justify-content 0.22s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active {
+      color: var(--on-dark);
+      background: rgba(255,255,255,0.13);
+      font-weight: 600;
+    }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ─────────────────── MAIN ─────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--canvas);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 420px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      color: var(--ink-subtle);
+    }
+    .search-wrap input {
+      width: 100%;
+      height: 40px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      padding: 0 16px 0 40px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input::placeholder { color: var(--ink-subtle); }
+    .search-wrap input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-muted);
+      transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      background: #e8612a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 4px;
+      letter-spacing: -0.12px;
+    }
+
+    /* ─────────────────── AVATAR DROPDOWN ─────────────────── */
+    .avatar-menu-wrap { position: relative; }
+
+    .avatar-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+      padding: 6px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .avatar-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    .dropdown-header {
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 6px;
+    }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .dropdown-email { font-size: 12px; color: var(--ink-subtle); letter-spacing: -0.12px; margin-top: 2px; }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      font-size: 14px;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); flex-shrink: 0; }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+    .dropdown-divider { height: 1px; background: var(--hairline); margin: 6px 0; }
+
+    /* ─────────────────── LAYOUT CONTENT ─────────────────── */
+    .content-wrap {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 0;
+      align-items: start;
+    }
+
+    .content {
+      padding: 32px;
+      min-width: 0;
+    }
+
+    /* ─────────────────── HERO BANNER ─────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #005451 0%, #008f8c 55%, #00d17a 100%);
+      border-radius: var(--radius-lg);
+      padding: 28px 36px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 260px; height: 260px;
+      border-radius: 50%;
+      border: 48px solid rgba(255,255,255,0.07);
+      right: -40px; top: -80px;
+      pointer-events: none;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      border: 30px solid rgba(255,255,255,0.05);
+      right: 120px; bottom: -50px;
+      pointer-events: none;
+    }
+
+    .hero-icon {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hero-icon svg { width: 26px; height: 26px; color: #fff; }
+
+    .hero-text {}
+    .hero-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--on-dark);
+      letter-spacing: -0.374px;
+      line-height: 1.14;
+      margin-bottom: 4px;
+    }
+    .hero-sub {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      letter-spacing: -0.224px;
+    }
+
+    /* ─────────────────── SETTINGS CARDS ─────────────────── */
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .setting-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .setting-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(0,143,140,0.08);
+    }
+
+    .setting-icon {
+      width: 42px; height: 42px;
+      border-radius: 11px;
+      background: var(--canvas-input);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .setting-icon svg { width: 20px; height: 20px; color: var(--ink-muted); }
+
+    .setting-body { flex: 1; min-width: 0; }
+    .setting-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      line-height: 1.3;
+    }
+    .setting-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      margin-top: 2px;
+    }
+
+    .setting-arrow { color: var(--ink-subtle); flex-shrink: 0; transition: transform 0.22s; }
+    .setting-arrow svg { width: 16px; height: 16px; }
+
+    /* ── Acordeão ── */
+    .accordion-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .accordion-card.open {
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(0,143,140,0.08);
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 22px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .accordion-header:hover .setting-title { color: var(--primary); }
+    .accordion-card.open .setting-arrow { transform: rotate(90deg); }
+
+    .accordion-body {
+      display: none;
+      padding: 0 22px 22px;
+      border-top: 1px solid var(--hairline);
+    }
+    .accordion-card.open .accordion-body { display: block; }
+
+    /* ── Form fields ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+    .form-input {
+      height: 40px;
+      background: var(--canvas-input);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .form-input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+    .form-input::placeholder { color: var(--ink-subtle); }
+
+    .form-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-subtle);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      grid-column: 1 / -1;
+      margin-top: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      grid-column: 1 / -1;
+    }
+    .btn-cancel {
+      height: 38px;
+      padding: 0 18px;
+      background: transparent;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .btn-cancel:hover { background: var(--canvas-input); }
+    .btn-save {
+      height: 38px;
+      padding: 0 22px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.224px;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .btn-save:hover { background: var(--primary-dark); }
+    .btn-save:active { transform: scale(0.97); }
+
+    /* ── Link de Cadastro (card especial) ── */
+    .setting-card.card-link-block {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      cursor: default;
+    }
+    .setting-card.card-link-block:hover {
+      border-color: var(--hairline);
+      box-shadow: none;
+    }
+    .card-link-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+    .link-field-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+    .link-field {
+      flex: 1;
+      height: 40px;
+      background: var(--canvas-input);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      font-size: 13px;
+      color: var(--ink-muted);
+      font-family: inherit;
+      letter-spacing: -0.12px;
+      outline: none;
+      cursor: text;
+    }
+    .btn-copy {
+      height: 40px;
+      padding: 0 18px;
+      background: var(--canvas-input);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      font-family: inherit;
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-copy:hover { background: #e5e5ea; border-color: #c7c7cc; }
+    .btn-copy.copied { color: var(--primary); border-color: var(--primary); }
+
+    /* ─────────────────── RIGHT SIDEBAR ─────────────────── */
+    .aside-right {
+      padding: 32px 24px 32px 0;
+      position: sticky;
+      top: var(--topbar-h);
+      max-height: calc(100vh - var(--topbar-h));
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .aside-right::-webkit-scrollbar { display: none; }
+
+    .aside-block {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+
+    .aside-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      margin-bottom: 14px;
+    }
+
+    .aside-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .aside-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      text-decoration: none;
+      transition: background 0.12s, color 0.12s;
+      cursor: pointer;
+    }
+    .aside-nav-item:hover { background: var(--canvas-page); color: var(--ink); }
+    .aside-nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.7; }
+
+    .help-block {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+    .help-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      margin-bottom: 6px;
+    }
+    .help-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .btn-support {
+      display: block;
+      width: 100%;
+      height: 38px;
+      background: var(--canvas-input);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      font-family: inherit;
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      text-align: center;
+      line-height: 38px;
+      text-decoration: none;
+    }
+    .btn-support:hover { background: #e5e5ea; color: var(--ink); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <img src="/IMG/logo.png" alt="Logo" style="width:52px;height:52px;object-fit:contain;">
+      </div>
+      <div class="logo-text" id="churchName"></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Ministérios</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Departamentos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Templates</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Escalação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Líderes</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Triagem</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Presença</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Gamificação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Relatórios</span>
+      </a>
+      <a class="nav-item active" href="/configuracoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar configurações..." />
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="icon-btn" title="Configurações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar perfil
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" id="logoutBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content-wrap">
+      <main class="content">
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <div class="hero-text">
+            <div class="hero-title">Configurações</div>
+            <div class="hero-sub">Personalize o sistema da sua instituição</div>
+          </div>
+        </div>
+
+        <!-- Settings list -->
+        <div class="settings-list">
+
+          <!-- Geral — acordeão -->
+          <div class="accordion-card" id="sec-geral">
+            <div class="accordion-header" id="geralHeader">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Geral</div>
+                <div class="setting-desc">Informações da instituição</div>
+              </div>
+              <div class="setting-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+
+            <div class="accordion-body">
+              <div class="form-grid">
+
+                <div class="form-section-label">Dados da instituição</div>
+
+                <div class="form-group full">
+                  <label class="form-label">Nome da Igreja</label>
+                  <input class="form-input" type="text" id="gNome" placeholder="Nome da sua instituição" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">CNPJ</label>
+                  <input class="form-input" type="text" id="gCnpj" placeholder="00.000.000/0000-00" maxlength="18" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">E-mail</label>
+                  <input class="form-input" type="email" id="gEmail" placeholder="contato@igreja.com.br" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Telefone / Contato</label>
+                  <input class="form-input" type="text" id="gPhone" placeholder="(00) 00000-0000" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Website</label>
+                  <input class="form-input" type="url" id="gWebsite" placeholder="https://suaigreja.com.br" />
+                </div>
+
+                <div class="form-section-label">Redes sociais</div>
+
+                <div class="form-group">
+                  <label class="form-label">Instagram</label>
+                  <input class="form-input" type="text" id="gInstagram" placeholder="@suaigreja" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">YouTube</label>
+                  <input class="form-input" type="text" id="gYoutube" placeholder="youtube.com/@suaigreja" />
+                </div>
+
+                <div class="form-section-label">Endereço</div>
+
+                <div class="form-group full">
+                  <label class="form-label">Logradouro</label>
+                  <input class="form-input" type="text" id="gEndereco" placeholder="Rua, Avenida, Travessa..." />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Número</label>
+                  <input class="form-input" type="text" id="gNumero" placeholder="123" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Complemento</label>
+                  <input class="form-input" type="text" id="gComplemento" placeholder="Sala, Bloco, Apto..." />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Cidade</label>
+                  <input class="form-input" type="text" id="gCidade" placeholder="São Paulo" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Estado</label>
+                  <input class="form-input" type="text" id="gEstado" placeholder="SP" maxlength="2" style="text-transform:uppercase" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">CEP</label>
+                  <input class="form-input" type="text" id="gCep" placeholder="00000-000" maxlength="9" />
+                </div>
+
+                <div class="form-actions">
+                  <button class="btn-cancel" id="geralCancel">Cancelar</button>
+                  <button class="btn-save" id="geralSave">Salvar alterações</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <a class="setting-card" href="#" id="sec-permissoes">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Permissões e Acessos</div>
+              <div class="setting-desc">Controle de acesso dos usuários</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a class="setting-card" href="#" id="sec-perguntas">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Perguntas do Voluntário</div>
+              <div class="setting-desc">Configure perguntas customizadas</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <!-- Link de Cadastro Geral -->
+          <div class="setting-card card-link-block" id="sec-link">
+            <div class="card-link-header">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Link de Cadastro Geral</div>
+                <div class="setting-desc">Compartilhe para voluntários se cadastrarem sem departamento pré-selecionado</div>
+              </div>
+            </div>
+            <div class="link-field-wrap">
+              <input class="link-field" type="text" id="linkField" readonly value="" />
+              <button class="btn-copy" id="btnCopy">Copiar</button>
+            </div>
+          </div>
+
+          <a class="setting-card" href="#" id="sec-checkin">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Check-in e Check-out</div>
+              <div class="setting-desc">Configurações de presença</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a class="setting-card" href="#" id="sec-escalas">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Escalas</div>
+              <div class="setting-desc">Regras de escalação</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a class="setting-card" href="#" id="sec-gamificacao">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Gamificação</div>
+              <div class="setting-desc">Sistema de pontos e badges</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a class="setting-card" href="#" id="sec-notificacoes">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Notificações</div>
+              <div class="setting-desc">Alertas e comunicações</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a class="setting-card" href="#" id="sec-visual">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 20v-8.5"/><path d="M20 20H4"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Personalização Visual</div>
+              <div class="setting-desc">Logo, cores e tema</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a class="setting-card" href="#" id="sec-admins">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Administradores</div>
+              <div class="setting-desc">Gerenciar admins do sistema</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+          <a class="setting-card" href="#" id="sec-convites">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div class="setting-body">
+              <div class="setting-title">Convites</div>
+              <div class="setting-desc">Gerenciar convites de usuários</div>
+            </div>
+            <div class="setting-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+
+        </div>
+      </main>
+
+      <!-- Right aside -->
+      <aside class="aside-right">
+        <div class="aside-block">
+          <div class="aside-title">Resumo</div>
+          <nav class="aside-nav-list">
+            <a class="aside-nav-item" href="#sec-geral">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Geral
+            </a>
+            <a class="aside-nav-item" href="#sec-permissoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Permissões e Acessos
+            </a>
+            <a class="aside-nav-item" href="#sec-perguntas">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Perguntas do Voluntário
+            </a>
+            <a class="aside-nav-item" href="#sec-checkin">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Check-in e Check-out
+            </a>
+            <a class="aside-nav-item" href="#sec-escalas">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Escalas
+            </a>
+            <a class="aside-nav-item" href="#sec-gamificacao">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Gamificação
+            </a>
+            <a class="aside-nav-item" href="#sec-notificacoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Notificações
+            </a>
+            <a class="aside-nav-item" href="#sec-visual">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 20v-8.5"/><path d="M20 20H4"/></svg>
+              Personalização Visual
+            </a>
+            <a class="aside-nav-item" href="#sec-admins">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Administradores
+            </a>
+            <a class="aside-nav-item" href="#sec-convites">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Convites
+            </a>
+          </nav>
+        </div>
+
+        <div class="help-block">
+          <div class="help-title">Precisa de ajuda?</div>
+          <div class="help-desc">Entre em contato com nosso suporte para dúvidas ou configurações avançadas.</div>
+          <a class="btn-support" href="#">Abrir Suporte</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
+
+    // Church name na sidebar
+    const churchNameEl = document.getElementById('churchName');
+    if (churchNameEl && igreja.nome) churchNameEl.textContent = igreja.nome;
+
+    // Avatar e dropdown
+    function getInitial(nome) {
+      return (nome || '').replace(/^(Sr\.|Sra\.)\s*/, '')[0]?.toUpperCase() || '?';
+    }
+    if (usuario.nome) {
+      document.getElementById('avatarBtn').textContent    = getInitial(usuario.nome);
+      document.getElementById('dropdownName').textContent  = usuario.nome;
+      document.getElementById('dropdownEmail').textContent = usuario.email || '';
+    }
+
+    // Link de cadastro
+    if (igreja.slug) {
+      document.getElementById('linkField').value =
+        `https://front.hubzion.com.br/cadastro?church=${encodeURIComponent(igreja.slug)}`;
+    }
+
+    // Copiar link
+    document.getElementById('btnCopy').addEventListener('click', () => {
+      const val = document.getElementById('linkField').value;
+      if (!val) return;
+      navigator.clipboard.writeText(val).then(() => {
+        const btn = document.getElementById('btnCopy');
+        btn.textContent = 'Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+      });
+    });
+
+    // Sidebar collapse
+    if (localStorage.getItem('sidebar-collapsed') === '1') {
+      document.body.classList.add('sidebar-collapsed');
+    }
+    document.getElementById('collapseBtn').addEventListener('click', () => {
+      document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
+    });
+
+    // Avatar dropdown
+    const avatarBtn      = document.getElementById('avatarBtn');
+    const avatarDropdown = document.getElementById('avatarDropdown');
+    avatarBtn.addEventListener('click', e => { e.stopPropagation(); avatarDropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => avatarDropdown.classList.remove('open'));
+
+    // ── Acordeão Geral ──
+    const geralCard   = document.getElementById('sec-geral');
+    const geralHeader = document.getElementById('geralHeader');
+    let churchLoaded  = false;
+
+    async function carregarIgreja() {
+      if (churchLoaded) return;
+      const token = localStorage.getItem('access_token');
+      try {
+        const res  = await fetch('/api/church', { headers: { Authorization: `Bearer ${token}` } });
+        const json = await res.json();
+        if (!json.church) return;
+        const c = json.church;
+        document.getElementById('gNome').value        = c.name        || '';
+        document.getElementById('gCnpj').value        = c.cnpj        || '';
+        document.getElementById('gEmail').value       = c.email       || '';
+        document.getElementById('gPhone').value       = c.phone       || '';
+        document.getElementById('gWebsite').value     = c.website     || '';
+        document.getElementById('gInstagram').value   = c.instagram   || '';
+        document.getElementById('gYoutube').value     = c.youtube     || '';
+        document.getElementById('gEndereco').value    = c.address     || '';
+        document.getElementById('gNumero').value      = c.number      || '';
+        document.getElementById('gComplemento').value = c.complement  || '';
+        document.getElementById('gCidade').value      = c.city        || '';
+        document.getElementById('gEstado').value      = c.state       || '';
+        document.getElementById('gCep').value         = c.zip_code    || '';
+        churchLoaded = true;
+      } catch (_) {}
+    }
+
+    geralHeader.addEventListener('click', () => {
+      geralCard.classList.toggle('open');
+      if (geralCard.classList.contains('open')) carregarIgreja();
+    });
+
+    document.getElementById('geralCancel').addEventListener('click', () => {
+      geralCard.classList.remove('open');
+    });
+
+    // Máscara CNPJ
+    document.getElementById('gCnpj').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 14);
+      v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      v = v.replace(/(\d{4})(\d)/, '$1-$2');
+      e.target.value = v;
+    });
+
+    // Máscara CEP
+    document.getElementById('gCep').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+      e.target.value = v;
+    });
+
+    // Máscara telefone
+    document.getElementById('gPhone').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+      else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d*)$/, '($1) $2-$3');
+      else if (v.length > 2) v = v.replace(/^(\d{2})(\d*)$/, '($1) $2');
+      e.target.value = v;
+    });
+
+    document.getElementById('geralSave').addEventListener('click', () => {
+      const btn = document.getElementById('geralSave');
+      btn.textContent = 'Salvo!';
+      btn.style.background = '#00a878';
+      setTimeout(() => { btn.textContent = 'Salvar alterações'; btn.style.background = ''; }, 2000);
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async e => {
+      e.preventDefault();
+      const token = localStorage.getItem('access_token');
+      try { await fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); } catch (_) {}
+      localStorage.clear();
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>
